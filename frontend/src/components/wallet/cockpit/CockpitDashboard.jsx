@@ -273,18 +273,26 @@ export default function CockpitDashboard({ address, onAnalyse, onClear, onBack }
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.35, ease: 'easeOut' }}
-                className="mt-3 space-y-3"
+                className="mt-4 space-y-4"
               >
-                <CockpitSidebar
-                  activeSection={activeSection}
-                  onSectionChange={handleSectionChange}
-                  txCount={walletMetrics?.totalTxCount}
+                {/* Risk strip */}
+                <CockpitMetrics
+                  riskScore={walletMetrics?.riskScore}
+                  riskLabel={walletMetrics?.riskLabel}
+                  riskLevel={walletMetrics?.riskLevel}
+                  primaryExplanation={suspiciousFeature?.summary}
+                  alertCount={highSeverityAlerts}
+                  totalTxs={walletMetrics?.totalTxCount}
                   counterparties={walletMetrics?.uniqueCounterparties}
-                  alerts={highSeverityAlerts}
+                  totalVolume={walletMetrics?.totalOutgoing}
                 />
 
-                <div className="grid items-start gap-3 xl:h-[calc(100vh-172px)] xl:grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)] 2xl:grid-cols-[minmax(0,1.32fr)_minmax(400px,0.88fr)]">
-                  <div className="relative min-w-0 xl:sticky xl:top-4 xl:h-[calc(100vh-188px)] xl:self-start">
+                {/* Graph — full width, dominant */}
+                <div>
+                  <div className="mb-2.5 text-[10px] font-mono uppercase tracking-[0.2em] text-slate-600">
+                    Primary Risk Path
+                  </div>
+                  <div className="relative min-w-0 overflow-hidden rounded-[28px]">
                     <CockpitGraph
                       nodes={graph?.nodes ?? []}
                       links={graph?.links ?? []}
@@ -323,60 +331,67 @@ export default function CockpitDashboard({ address, onAnalyse, onClear, onBack }
                       </div>
                     )}
                   </div>
+                </div>
 
-                  <div className="min-w-0 space-y-3 xl:max-h-[calc(100vh-188px)] xl:overflow-y-auto xl:pr-1">
-                    <PathInspector
-                      selectedNode={selectedNode}
-                      selectedPath={selectedPath}
-                      primaryPath={null}
-                      centerAddress={address}
-                      onClose={() => {
-                        setSelectedNode(null);
-                        setSelectedPath(null);
-                      }}
-                      fullWidth
-                    />
+                {/* Node / path detail — conditional, full width */}
+                {(selectedNode || selectedPath) && (
+                  <PathInspector
+                    selectedNode={selectedNode}
+                    selectedPath={selectedPath}
+                    primaryPath={null}
+                    centerAddress={address}
+                    onClose={() => {
+                      setSelectedNode(null);
+                      setSelectedPath(null);
+                    }}
+                    fullWidth
+                  />
+                )}
 
-                    <CockpitMetrics
-                      riskScore={walletMetrics?.riskScore}
-                      riskLabel={walletMetrics?.riskLabel}
-                      riskLevel={walletMetrics?.riskLevel}
-                      alertCount={highSeverityAlerts}
-                      totalTxs={walletMetrics?.totalTxCount}
-                      counterparties={walletMetrics?.uniqueCounterparties}
-                      chain={walletMetrics?.chain}
-                      outbound={walletMetrics?.totalOutgoing}
-                      fees={walletMetrics?.feesTotal}
-                      graphRelationships={graph?.links?.length}
-                      exposureFlagged={exposureCount}
-                    />
-
-                    <div ref={analysisRef}>
-                      <AnalysisTabs
-                        summary={compactSummary}
-                        signals={signals}
-                        exposure={exposure}
+                {/* Evidence: summary sentence + 2-col signals / counterparties */}
+                <div className="space-y-3">
+                  {compactSummary && (
+                    <p className="px-1 text-[13px] leading-6 text-slate-500">{compactSummary}</p>
+                  )}
+                  <div className="grid gap-3 lg:grid-cols-2" ref={analysisRef}>
+                    <EvidencePanel title="Behavioural Signals">
+                      <BehaviouralSignals signals={signals} />
+                    </EvidencePanel>
+                    <EvidencePanel title="Top Counterparties">
+                      <CounterpartyRanked
                         counterparties={counterpartyData}
-                        transactions={transactions}
-                        alerts={alerts}
-                        timelineData={timelineData}
-                        activeTab={activeSection}
-                        onTabChange={handleSectionChange}
-                        showTabBar={false}
-                        onSelectCounterparty={(counterparty) => {
-                          const node = graph?.nodes?.find((candidate) => candidate.id === counterparty.address);
-                          if (node) {
-                            handleNodeSelect(node);
-                            if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches) {
-                              requestAnimationFrame(() => {
-                                analysisRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                              });
-                            }
-                          }
+                        onSelect={(counterparty) => {
+                          const node = graph?.nodes?.find((n) => n.id === counterparty.address);
+                          if (node) handleNodeSelect(node);
                         }}
                       />
-                    </div>
+                    </EvidencePanel>
                   </div>
+                </div>
+
+                {/* Detail nav + tabs */}
+                <div className="space-y-3">
+                  <CockpitSidebar
+                    activeSection={activeSection}
+                    onSectionChange={handleSectionChange}
+                    txCount={walletMetrics?.totalTxCount}
+                    counterparties={walletMetrics?.uniqueCounterparties}
+                    alerts={highSeverityAlerts}
+                  />
+                  <AnalysisTabs
+                    signals={signals}
+                    counterparties={counterpartyData}
+                    transactions={transactions}
+                    alerts={alerts}
+                    timelineData={timelineData}
+                    activeTab={activeSection}
+                    onTabChange={handleSectionChange}
+                    showTabBar={false}
+                    onSelectCounterparty={(counterparty) => {
+                      const node = graph?.nodes?.find((n) => n.id === counterparty.address);
+                      if (node) handleNodeSelect(node);
+                    }}
+                  />
                 </div>
               </motion.div>
             )}

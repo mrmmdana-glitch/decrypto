@@ -2,13 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install dependencies first (cached layer)
-# Paths are relative to the repo root (Railway build context)
-COPY backend/requirements.txt .
+# Build context is backend/ — all paths are relative to it
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend source
-COPY backend/ .
+COPY . .
 
 EXPOSE 8000
 
