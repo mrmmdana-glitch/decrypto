@@ -2,7 +2,6 @@ import { useState, useMemo, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useWalletAnalysis } from '../../../hooks/useWalletAnalysis';
-import { ENTITY_COLORS } from '../../../constants';
 import { getFeatureInsight } from '../../../adapters/walletAdapter';
 
 import CockpitCommandBar from './CockpitCommandBar';
@@ -15,29 +14,122 @@ import GridScanBackground from './GridScanBackground';
 
 const pageTransition = { type: 'spring', stiffness: 140, damping: 22, mass: 0.85 };
 
+const IMPACT_COLORS = {
+  Critical: '#f87171',
+  High: '#fb923c',
+  Medium: '#fbbf24',
+  Low: '#4ade80',
+};
+
+function EvidencePanel({ title, children }) {
+  return (
+    <div className="rounded-[24px] border border-white/5 bg-[#0d0f17] p-5 shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
+      <div className="mb-4 text-[10px] font-mono uppercase tracking-[0.2em] text-slate-500">{title}</div>
+      {children}
+    </div>
+  );
+}
+
+function BehaviouralSignals({ signals }) {
+  if (!signals?.length) {
+    return <div className="text-[12px] text-slate-600">No elevated risk signals detected.</div>;
+  }
+
+  return (
+    <div className="space-y-2.5">
+      {signals.slice(0, 4).map((signal, i) => {
+        const label = typeof signal === 'string' ? signal : signal.label;
+        const summary = typeof signal === 'string' ? null : signal.summary;
+        const impact = typeof signal === 'string' ? null : signal.impact;
+        const color = IMPACT_COLORS[impact] ?? null;
+
+        return (
+          <div
+            key={typeof signal === 'object' ? (signal.key ?? i) : i}
+            className="rounded-[14px] bg-white/[0.025] px-4 py-3"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-[13px] font-medium text-slate-200">{label}</span>
+              {impact && color && (
+                <span
+                  className="flex-shrink-0 rounded-full px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.12em]"
+                  style={{ color, background: `${color}18` }}
+                >
+                  {impact}
+                </span>
+              )}
+            </div>
+            {summary && (
+              <p className="mt-1.5 text-[12px] leading-5 text-slate-500">{summary}</p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function CounterpartyRanked({ counterparties, onSelect }) {
+  if (!counterparties?.length) {
+    return <div className="text-[12px] text-slate-600">No counterparties available.</div>;
+  }
+
+  return (
+    <div className="space-y-2">
+      {counterparties.slice(0, 5).map((cp, i) => (
+        <button
+          key={cp.address ?? i}
+          className="flex w-full items-center gap-3 rounded-[14px] bg-white/[0.025] px-4 py-3 text-left transition-colors hover:bg-white/[0.04]"
+          onClick={() => onSelect?.(cp)}
+        >
+          <span className="w-5 flex-shrink-0 text-center text-[11px] font-mono text-slate-600">#{i + 1}</span>
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="truncate text-[12px] font-medium text-slate-300">{cp.name}</span>
+            <span className="truncate font-mono text-[10px] text-slate-600">{cp.address}</span>
+          </div>
+          <span className="flex-shrink-0 font-mono text-[12px]" style={{ color: cp.color }}>
+            {cp.btcTotalFormatted}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function deriveSignals(walletMetrics, alerts) {
   const signals = [];
   const seen = new Set();
 
-  walletMetrics?.topFeatures?.slice(0, 3).forEach((feature) => {
+  walletMetrics?.topFeatures?.slice(0, 3).forEach((feature, idx) => {
     const insight = getFeatureInsight(feature);
-    const value = `${insight.label}: ${insight.summary}`;
-    if (!seen.has(value)) {
-      seen.add(value);
-      signals.push(value);
+    if (!seen.has(insight.key)) {
+      seen.add(insight.key);
+      const riskLevel = walletMetrics.riskLevel ?? '';
+      const impact =
+        riskLevel === 'critical' ? (idx === 0 ? 'Critical' : 'High')
+        : riskLevel === 'high' ? 'High'
+        : riskLevel === 'medium' ? (idx === 0 ? 'High' : 'Medium')
+        : 'Medium';
+      signals.push({ key: insight.key, label: insight.label, summary: insight.summary, impact });
     }
   });
 
-  alerts?.filter((a) => a.severity === 'critical' || a.severity === 'high')
+  alerts
+    ?.filter((a) => a.severity === 'critical' || a.severity === 'high')
     .slice(0, 2)
     .forEach((alert) => {
-      if (!seen.has(alert.title)) {
-        seen.add(alert.title);
-        signals.push(alert.title);
+      if (!seen.has(alert.id)) {
+        seen.add(alert.id);
+        signals.push({
+          key: alert.id,
+          label: alert.title,
+          summary: alert.description,
+          impact: alert.severity === 'critical' ? 'Critical' : 'High',
+        });
       }
     });
 
-  return signals.slice(0, 5);
+  return signals.slice(0, 4);
 }
 
 function buildCompactSummary(walletMetrics, entityInsights) {
@@ -69,22 +161,10 @@ function buildCompactSummary(walletMetrics, entityInsights) {
   return summaryParts.join(' ');
 }
 
-function deriveExposure(entityInsights) {
-  const items = [
-    { label: 'Sanctioned entities', count: entityInsights?.sanctioned ?? 0, color: ENTITY_COLORS.sanctioned },
-    { label: 'Mixers', count: entityInsights?.mixers ?? 0, color: ENTITY_COLORS.mixer },
-    { label: 'Darknet links', count: entityInsights?.darknet ?? 0, color: ENTITY_COLORS.darknet },
-    { label: 'High-risk services', count: entityInsights?.highRiskServices ?? 0, color: ENTITY_COLORS.high_risk_service },
-    { label: 'Exchanges', count: entityInsights?.exchanges ?? 0, color: ENTITY_COLORS.exchange },
-  ];
-
-  return items.filter((item) => item.count > 0);
-}
-
 export default function CockpitDashboard({ address, onAnalyse, onClear, onBack }) {
   const [selectedNode, setSelectedNode] = useState(null);
   const [selectedPath, setSelectedPath] = useState(null);
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState('transactions');
   const analysisRef = useRef(null);
   const hasActiveAddress = Boolean(address);
 
@@ -111,25 +191,10 @@ export default function CockpitDashboard({ address, onAnalyse, onClear, onBack }
     [walletMetrics, alerts]
   );
 
-  const exposure = useMemo(
-    () => deriveExposure(entityInsights),
-    [entityInsights]
-  );
-
   const compactSummary = useMemo(
     () => buildCompactSummary(walletMetrics, entityInsights),
     [walletMetrics, entityInsights]
   );
-
-  const exposureCount = useMemo(() => {
-    return [
-      entityInsights?.sanctioned ?? 0,
-      entityInsights?.mixers ?? 0,
-      entityInsights?.darknet ?? 0,
-      entityInsights?.highRiskServices ?? 0,
-      entityInsights?.ransomware ?? 0,
-    ].reduce((sum, value) => sum + value, 0);
-  }, [entityInsights]);
 
   const highSeverityAlerts = useMemo(
     () => alerts?.filter((a) => a.severity === 'critical' || a.severity === 'high').length ?? 0,
