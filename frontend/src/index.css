@@ -1,0 +1,158 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Global animations ── */
+@keyframes decryptoGrad {
+  0%   { background-position: 0% 50% }
+  50%  { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+@keyframes stepLineDraw {
+  from { transform: scaleX(0) }
+  to   { transform: scaleX(1) }
+}
+@keyframes pulseRing {
+  0%   { box-shadow: 0 0 0 0 rgba(139,92,246,0.4) }
+  70%  { box-shadow: 0 0 0 10px rgba(139,92,246,0) }
+  100% { box-shadow: 0 0 0 0 rgba(139,92,246,0) }
+}
+
+/* ── Step card visuals ── */
+@keyframes decryptoBlink   { 0%,100% { opacity: 1 } 50% { opacity: 0 } }
+@keyframes dashMove        { to { stroke-dashoffset: -16; } }
+@keyframes pulseSuspect    { 0%,100% { opacity: 0.65 } 50% { opacity: 1 } }
+
+/* ── Capability demos ── */
+@keyframes fltA { 0%,100% { transform: translate(0,0) } 50% { transform: translate(0,-5px) } }
+@keyframes fltB { 0%,100% { transform: translate(0,0) } 50% { transform: translate(3px,3px) } }
+@keyframes fltC { 0%,100% { transform: translate(0,0) } 50% { transform: translate(-2px,4px) } }
+@keyframes fadeSl {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Carousel card backgrounds ── */
+@keyframes flowDash1 { from { stroke-dashoffset: 0 } to { stroke-dashoffset: -180 } }
+@keyframes flowDash2 { from { stroke-dashoffset: 0 } to { stroke-dashoffset: -220 } }
+@keyframes flowDash3 { from { stroke-dashoffset: 0 } to { stroke-dashoffset: -160 } }
+@keyframes liqFlow   { from { stroke-dashoffset: 0 } to { stroke-dashoffset: -240 } }
+
+.decrypto-gradient {
+  background: linear-gradient(120deg, #ffffff 0%, #e2d9f3 20%, #a78bfa 40%, #818cf8 60%, #c4b5fd 80%, #ffffff 100%);
+  background-size: 250% 250%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: decryptoGrad 6s ease infinite;
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body, #root { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+  body { background-color: #090a0f; color: #f1f0f4; font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.2); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,0.35); }
+}
+
+@layer utilities {
+  /* ---- Typography ---- */
+  .font-mono { font-family: "JetBrains Mono", "Fira Code", Consolas, monospace; }
+  .text-glow-purple { text-shadow: 0 0 24px rgba(139,92,246,0.7), 0 0 48px rgba(139,92,246,0.2); }
+  .text-glow-red    { text-shadow: 0 0 16px rgba(220,38,38,0.6); }
+  /* keep cyan for secondary sparingly */
+  .text-glow-cyan   { text-shadow: 0 0 20px rgba(8,145,178,0.5); }
+
+  /* ---- Glass panels ---- */
+  .glass-panel {
+    background: rgba(13, 14, 21, 0.78);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.14);
+    border-radius: 10px;
+  }
+  .glass-nav {
+    background: rgba(9, 10, 15, 0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.12);
+  }
+  .glass-surface {
+    background: rgba(19, 20, 31, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+  }
+  .glass-chip {
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.18);
+    border-radius: 6px;
+  }
+
+  /* ---- Focus rings ---- */
+  .ring-purple { box-shadow: 0 0 0 1px rgba(139,92,246,0.45), inset 0 0 20px rgba(139,92,246,0.02); }
+
+  /* ---- Backgrounds ---- */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .bg-dot-grid {
+    background-image: radial-gradient(rgba(139,92,246,0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  /* ---- Card surfaces ---- */
+  .card-surface          { background: #0e0f18; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; }
+  .card-surface-elevated { background: #13141f; border: 1px solid rgba(139,92,246,0.1);  border-radius: 8px; }
+  .truncate-addr { font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.04em; }
+
+  /* ---- Risk colours (slightly desaturated / muted) ---- */
+  .risk-critical { color: #f87171; }
+  .risk-high     { color: #fb923c; }
+  .risk-medium   { color: #fbbf24; }
+  .risk-low      { color: #4ade80; }
+
+  .bg-risk-critical { background-color: rgba(220,38,38,0.12); }
+  .bg-risk-high     { background-color: rgba(234,88,12,0.12); }
+  .bg-risk-medium   { background-color: rgba(217,119,6,0.12); }
+  .bg-risk-low      { background-color: rgba(22,163,74,0.12); }
+
+  .border-risk-critical { border-color: rgba(220,38,38,0.35); }
+  .border-risk-high     { border-color: rgba(234,88,12,0.35); }
+  .border-risk-medium   { border-color: rgba(217,119,6,0.35); }
+  .border-risk-low      { border-color: rgba(22,163,74,0.35); }
+
+  /* ---- Graph vignette ---- */
+  .graph-vignette { background: radial-gradient(ellipse at center, transparent 42%, #090a0f 90%); pointer-events: none; }
+
+  /* ---- Scan-line animation (used in entry screen) ---- */
+  .animate-slide-in-right { animation: slideInRight 0.3s ease-out; }
+
+  /* ---- Hero title glow breathe ---- */
+  .animate-glow-breathe {
+    animation: glowBreathe 3.2s ease-in-out infinite;
+  }
+  @keyframes glowBreathe {
+    0%, 100% {
+      text-shadow: 0 0 18px rgba(139,92,246,0.55), 0 0 40px rgba(139,92,246,0.18);
+      opacity: 1;
+    }
+    50% {
+      text-shadow: 0 0 40px rgba(168,85,247,1), 0 0 80px rgba(139,92,246,0.55), 0 0 120px rgba(139,92,246,0.2);
+      opacity: 0.92;
+    }
+  }
+
+  @keyframes moveBackground {
+    from { background-position: 0% 0%; }
+    to   { background-position: 0% -1000%; }
+  }
+}

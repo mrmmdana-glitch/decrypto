@@ -1,18 +1,44 @@
-# Logs
-logs
+# ── Logs ──────────────────────────────────────────────────────────────────────
+logs/
 *.log
+*.err.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# ── Frontend build & dependencies ─────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
 *.local
 
-# Editor directories and files
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.venv/
+venv/
+env/
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Large ML model binaries (re-train locally) ────────────────────────────────
+backend/models/*.joblib
+
+# ── Large dataset files (download / regenerate locally) ───────────────────────
+backend/data/AddrAddr_edgelist.csv
+backend/data/AddrTx_edgelist.csv
+backend/data/TxAddr_edgelist.csv
+backend/data/wallets_classes.csv
+backend/data/wallets_features.csv
+
+# ── Editor directories and files ──────────────────────────────────────────────
 .vscode/*
 !.vscode/extensions.json
 .idea

@@ -1,0 +1,18 @@
+{
+  "1FeexV6bAHb8ybZjqQMjJrcCrHGW9sb6uF": {
+    "label": "Known flagged wallet",
+    "reason": "Matched a locally curated analyst watchlist for historically flagged funds.",
+    "risk_label": "illicit",
+    "risk_score": 0.99,
+    "severity": "critical",
+    "entity_type": "laundering"
+  },
+  "bc1qa5wkga2g8253a6962r2s23snge2jru2z572aaz": {
+    "label": "Known flagged wallet",
+    "reason": "Matched a locally curated analyst watchlist for historically flagged funds.",
+    "risk_label": "illicit",
+    "risk_score": 0.97,
+    "severity": "critical",
+    "entity_type": "laundering"
+  }
+}

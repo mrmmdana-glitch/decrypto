@@ -1,0 +1,19 @@
+# Handled by root .gitignore — this file kept for standalone backend usage
+.vscode
+venv/
+.venv/
+__pycache__/
+*.pyc
+.idea/
+.DS_Store
+.env
+
+# Large datasets (keep address_watchlist.json — it's tiny)
+data/AddrAddr_edgelist.csv
+data/AddrTx_edgelist.csv
+data/TxAddr_edgelist.csv
+data/wallets_classes.csv
+data/wallets_features.csv
+
+# Large ML binaries (keep *.json and *.csv — they're small metadata)
+models/*.joblib
