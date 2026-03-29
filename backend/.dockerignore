@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+.env
+.git/
+.gitignore
+
+# Large datasets — mount or download at runtime
+data/AddrAddr_edgelist.csv
+data/AddrTx_edgelist.csv
+data/TxAddr_edgelist.csv
+data/wallets_classes.csv
+data/wallets_features.csv
+
+# Large ML binaries — mount via Railway volume or download at startup
+models/*.joblib
+
+tests/
+README.md
